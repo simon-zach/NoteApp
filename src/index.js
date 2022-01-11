@@ -3,6 +3,32 @@ const { ApolloServerPluginDrainHttpServer } = require  ('apollo-server-core');
 const express= require ('express');
 const http = require ('http');
 
+const { MongoClient } = require("mongodb");
+// Connection URI
+const uri =
+  "mongodb://localhost:27017";
+// Create a new MongoClient
+const client = new MongoClient(uri);
+async function run() {
+  try {
+    // Connect the client to the server
+    await client.connect();
+    // Establish and verify connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Connected successfully to server");
+    const FirstCollection = client.db("admin").collection("FirstCollection")
+     const cursor = FirstCollection.find({})
+     await cursor.forEach(doc => console.log(doc))
+     const doc = { name: "Neapolitan pizza", shape: "round" };
+     const result = await FirstCollection.insertOne(doc);
+
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+}
+run().catch(console.dir);
+
 let notes = [
     {
       id: '1',
@@ -22,19 +48,19 @@ let notes = [
   ];
 const typeDefs = gql`
   type Note {
-    id: ID
-    content: String
-    author: String
+    id: ID!
+    content: String!
+    author: String!
   }
 
   type Query {
-    hello: String
-    notes: [Note]
-    note(id: ID): Note
+    hello: String!
+    notes: [Note!]
+    note(id: ID!): Note!
   }
 
   type Mutation {
-    newNote(content: String!): Note
+    newNote(content: String!): Note!
   }
 `;
 
@@ -73,7 +99,9 @@ async function startApolloServer(typeDefs, resolvers) {
   server.applyMiddleware({ app,path: '/api' });
   await new Promise(resolve => httpServer.listen({ port: 4000 }, resolve));
   console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
- 
+  app.get('/', function (req, res) {
+    res.send('hello world')
+  })
 }
 
 startApolloServer(typeDefs, resolvers)

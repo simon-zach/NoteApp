@@ -5,6 +5,7 @@
     "apollo-server-express": "^3.6.1",
     "express": "^4.17.2",
     "graphql": "^16.2.0",
+    "mongodb": "^4.3.0",
     "nodemon": "^2.0.15"
   }
 }
