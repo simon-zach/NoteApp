@@ -1,4 +1,4 @@
-const { ApolloServer ,gql} = require ('apollo-server-express');
+const { ApolloServer } = require ('apollo-server-express');
 const { ApolloServerPluginDrainHttpServer } = require  ('apollo-server-core');
 const express= require ('express');
 const http = require ('http');
@@ -6,49 +6,13 @@ const models = require('./models')
 require ('dotenv').config();
 const db = require('./db')
 const DB_HOST = process.env.DB_HOST
-
+const typeDefs = require('./schema')
+const resolvers = require('./resolvers/index')
 db.connect(DB_HOST);
 
 
 
-const typeDefs = gql`
-  type Note {
-    id: ID!
-    content: String!
-    author: String!
-  }
 
-  type Query {
-    hello: String!
-    notes: [Note!]
-    note(id: ID!): Note!
-  }
-
-  type Mutation {
-    newNote(content: String!): Note!
-  }
-`;
-
-// Provide resolver functions for our schema fields
-const resolvers = {
-  Query: {
-    hello: () => 'Hello world!',
-    notes:  async ()=>{
-      return await models.Note.find()
-    },
-    note: async (parent, args) => {
-      return await models.Note.findById(args.id);
-    }
-  },
-  Mutation: {
-    newNote: async (parent, args) => {
-     return await models.Note.create({
-        content: args.content,
-        author: 'Simon Zach'
-     })
-    }
-  }
-};
 
 async function startApolloServer(typeDefs, resolvers) {
   
@@ -57,6 +21,7 @@ async function startApolloServer(typeDefs, resolvers) {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    context:{ models},
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
   await server.start();
