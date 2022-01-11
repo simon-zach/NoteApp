@@ -2,50 +2,15 @@ const { ApolloServer ,gql} = require ('apollo-server-express');
 const { ApolloServerPluginDrainHttpServer } = require  ('apollo-server-core');
 const express= require ('express');
 const http = require ('http');
+const models = require('./models')
+require ('dotenv').config();
+const db = require('./db')
+const DB_HOST = process.env.DB_HOST
 
-const { MongoClient } = require("mongodb");
-// Connection URI
-const uri =
-  "mongodb://localhost:27017";
-// Create a new MongoClient
-const client = new MongoClient(uri);
-async function run() {
-  try {
-    // Connect the client to the server
-    await client.connect();
-    // Establish and verify connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Connected successfully to server");
-    const FirstCollection = client.db("admin").collection("FirstCollection")
-     const cursor = FirstCollection.find({})
-     await cursor.forEach(doc => console.log(doc))
-     const doc = { name: "Neapolitan pizza", shape: "round" };
-     const result = await FirstCollection.insertOne(doc);
+db.connect(DB_HOST);
 
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
-}
-run().catch(console.dir);
 
-let notes = [
-    {
-      id: '1',
-      content: 'This is a note',
-      author: 'Adam Scott'
-    },
-    {
-      id: '2',
-      content: 'This is another note',
-      author: 'Harlow Everly'
-    },
-    {
-      id: '3',
-      content: 'Oh hey look, another note!',
-      author: 'Riley Harrison'
-    }
-  ];
+
 const typeDefs = gql`
   type Note {
     id: ID!
@@ -68,20 +33,19 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     hello: () => 'Hello world!',
-    notes: () => notes,
-    note: (parent, args) => {
-      return notes.find(note => note.id === args.id);
+    notes:  async ()=>{
+      return await models.Note.find()
+    },
+    note: async (parent, args) => {
+      return await models.Note.findById(args.id);
     }
   },
   Mutation: {
-    newNote: (parent, args) => {
-      let noteValue = {
-        id: String(notes.length + 1),
+    newNote: async (parent, args) => {
+     return await models.Note.create({
         content: args.content,
-        author: 'Adam Scott'
-      };
-      notes.push(noteValue);
-      return noteValue;
+        author: 'Simon Zach'
+     })
     }
   }
 };
