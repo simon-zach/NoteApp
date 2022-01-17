@@ -24,11 +24,6 @@ module.exports = {
         }
         //odszukanie notatki
         const note = await models.Note.findById(id)
-        //console.log(note.author)
-        //console.log(user.id)
-       // console.log(note)
-       //console.log(String(note.author))
-       // console.log(note && String(note.author))
 
         if(note && String(note.author) !== user.id){
             throw new ForbiddenError('Nie masz uprawnien do notatki')

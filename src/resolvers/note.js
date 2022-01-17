@@ -1,4 +1,4 @@
-const { models } = require("mongoose")
+
 
 module.exports = {
     //zwracanie authora kiedy pobieramy notatke
