@@ -26,7 +26,7 @@ const UserSchema = new mongoose.Schema(
     
 );
 
-//Zdefiniowanie modelu user ze schematem
+//Defining user model with UserSchema
 const User = mongoose.model('User', UserSchema)
 
 module.exports = User;

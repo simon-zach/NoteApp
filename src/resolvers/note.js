@@ -1,12 +1,12 @@
 
 
 module.exports = {
-    //zwracanie authora kiedy pobieramy notatke
+    //Return of author data in note data
     author: async (note, args, {models}) => {
         return await models.User.findById(note.author)
     },
 
-    //pobranie favoritedBy podczas pobierania notatki
+    //return of favorited by data in note data
     favoritedBy: async (note, args, {models}) => {
         return await models.User.find({_id: {$in: note.favoritedBy} })
     }

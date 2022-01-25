@@ -9,7 +9,8 @@ const DB_HOST = process.env.DB_HOST
 const typeDefs = require('./schema')
 const resolvers = require('./resolvers/index')
 const jwt = require('jsonwebtoken');
-
+const cors = require('cors')
+const helmet = require('helmet')
 
 db.connect(DB_HOST);
 
@@ -32,6 +33,8 @@ const getUser = token => {
 async function startApolloServer(typeDefs, resolvers) {
   
   const app = express();
+  app.use(cors())
+  //app.use(helmet())
   const httpServer = http.createServer(app);
 
   const server = new ApolloServer({

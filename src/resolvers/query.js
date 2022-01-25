@@ -6,6 +6,7 @@ module.exports =  {
       return await models.Note.find()
     },
     note: async (parent, args, {models}) => {
+      
       return await models.Note.findById(args.id);
     },
     user: async (parent, {username}, {models,user})=>{

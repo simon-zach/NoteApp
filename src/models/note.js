@@ -6,6 +6,15 @@ const noteSchema = new mongoose.Schema(
             type: String,
             required: true
         },
+        color: {
+            type: Number,
+            required: true,
+            default: 1
+        },
+        title: {
+            type: String,
+            required: true
+        },
         author: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
@@ -26,7 +35,7 @@ const noteSchema = new mongoose.Schema(
     
 );
 
-//Zdefiniowanie modelu Note ze schematem
+//defining Note model with noteSchema
 const Note = mongoose.model('Note', noteSchema)
 
 module.exports = Note;

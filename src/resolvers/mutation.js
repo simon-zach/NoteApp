@@ -10,27 +10,28 @@ const mongoose = require('mongoose')
 module.exports = {
     newNote: async (parent, args,{models, user}) => {
         if (!user){
-            throw new AuthenticationError('Tylko zalogowani użytkownicy mogą tworzyć notatki')
+            throw new AuthenticationError('Only logged users can create notes')
         }
         return await models.Note.create({
         content: args.content,
-        //Odwołanie do identyfikatora uzytkownika
+        title: args.title,
+        color: args.color,
+        //author is user
         author: mongoose.Types.ObjectId(user.id)
         })
     },
     deleteNote: async (parent, {id}, {models,user}) => {
         if (!user){
-            throw new AuthenticationError('Tylko zalogowani użytkownicy mogą usuwac notatki')
+            throw new AuthenticationError('Only loged users can delete notes')
         }
-        //odszukanie notatki
+        //finding note
         const note = await models.Note.findById(id)
 
         if(note && String(note.author) !== user.id){
-            throw new ForbiddenError('Nie masz uprawnien do notatki')
+            throw new ForbiddenError('You have no access to note')
         }
 
         try{
-            //await models.Note.findOneAndRemove({_id: id})
             await note.remove();
             return true;
         }catch (err){
@@ -38,15 +39,15 @@ module.exports = {
         }
     },
 
-    updateNote: async (parent, {content,id}, {models,user}) => {   
+    updateNote: async (parent, {content,id,title,color}, {models,user}) => {   
         if (!user){
-            throw new AuthenticationError('Tylko zalogowani użytkownicy mogą usuwac notatki')
+            throw new AuthenticationError('Only logged user can delete notes')
         }
 
         const note = await models.Note.findById(id)
 
         if(note && String(note.author) !== user.id){
-            throw new ForbiddenError("Nie masz uprawnien do uaktualnienia notatki")
+            throw new ForbiddenError("You have no permission to update note")
         }
 
             return await models.Note.findOneAndUpdate(
@@ -55,18 +56,20 @@ module.exports = {
                 },
                 {
                     $set: {
-                        content
+                        content,
+                        title,
+                        color
                     }
                 },
             );
     },
     signUp: async (parent, {username,email,password}, {models})=>{
 
-        //Trim usuwa spacje
+        //Trim deleteig white spaces
         email = email.trim().toLowerCase()
-        //Utworzenie warttosci hash na podstawie hasla
+        //Creating hash value from password 
         const hashed = await bcrypt.hash(password,10)
-        //Utworzenie adresu URL gravatar
+        //Creating URL adress of gravatar
         const avatar = gravatar(email);
         try {
             const user = await models.User.create({
@@ -78,8 +81,7 @@ module.exports = {
             //creation and token return
             return jwt.sign({id: user._id}, process.env.JWT_SECRET);
         }catch(err){
-            console.log(err)
-            throw new Error('Błąd podczas tworzenia konta')
+            throw new Error('Error during account creation')
         }
         
     },
@@ -93,13 +95,12 @@ module.exports = {
   
         //user not found
         if(!user){
-            throw new AuthenticationError('Błąd podczas uwierzytelniania.')
+            throw new AuthenticationError('Error during authentication')
         }
 
         const valid = await bcrypt.compare(password,user.password)
-        //console.log(valid)
         if(!valid){
-            throw new AuthenticationError('Błąd podczas uwierzytelniania')
+            throw new AuthenticationError('Error during authentication')
         }
 
         //Creation token and return
@@ -107,42 +108,42 @@ module.exports = {
     },
     toggleFavorite: async (parent, { id}, {models,user})=>{
         if (!user){
-            throw AuthenticationError("Użytkownik musi być zalogowany")
+            throw AuthenticationError("User must be logged")
         }
 
         const note = await models.Note.findById(id);
-        //czy uzytkownik który chce toglowac jest pod tą notatka
+        //is user added to note already
         const hasUser = note.favoritedBy.indexOf(user.id);
 
-        //Jezeli uzytkownik jest na liscie to trzeba go usunac z listy
+        //If user is on list has to be romoved
         if (hasUser >= 0){
             return await models.Note.findByIdAndUpdate(
                 id,
                 {
                     $pull: {
-                        favoritedBy: mongoose.Types.ObjectId(user.id)//usuwa tego uzytkownika z favoriteBy
+                        favoritedBy: mongoose.Types.ObjectId(user.id)//removing user from favoritedBy
                     },
                     $inc: {
                         favoriteCount: -1
                     }
                 },
                 {
-                    new: true //zwraca uaktualniona notatke
+                    new: true //returning updated note
                 }
             );
-        } else {// jezeli nie ma uzytkownika postepujemy na odwrót
+        } else {
             return await models.Note.findByIdAndUpdate(
                 id,
                 {
                     $push: {
-                        favoritedBy: mongoose.Types.ObjectId(user.id)//usuwa tego uzytkownika z favoriteBy
+                        favoritedBy: mongoose.Types.ObjectId(user.id)//adding user to favorited by
                     },
                     $inc: {
                         favoriteCount: +1
                     }
                 },
                 {
-                    new: true //zwraca uaktualniona notatke
+                    new: true //returnig updated note
                 }
             );
         }
