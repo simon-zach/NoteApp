@@ -1,4 +1,4 @@
-# Note App server
+# Note App Server
 
 This App was created to show usage of Apollo Server, Express, MongoDB and GraphQL.
 
