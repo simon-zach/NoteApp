@@ -56,7 +56,7 @@ Server was tested on localhost at port 4000
 App use MongoDB on port 27017 
 > mongodb://localhost:27017/Notedly
 
-#How to run?
+##How to run?
 
 Clone repo and create own empty mongoDB data base named Notedly with two empty collections:
 > users
