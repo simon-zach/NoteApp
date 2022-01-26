@@ -11,15 +11,17 @@ App use MongoDB on port 27017
 
 #How to run?
 
-Clone repo, import DB from external file or create own empty data base named Notedly with two collections:
+Clone repo and create own empty mongoDB data base named Notedly with two empty collections:
 > users
 
 > notes
 
 DB can be very easly created with MongoDB Compass desktop app.
 
+When done.
+
 run `nodemon  src/index.js`
 
 GraphQL Apollo Api should be available at localhost:4000/api
 
-The client created for this app is located in NoteAppClient repository.
+The client created for this app is located in noteAppClient repository.
